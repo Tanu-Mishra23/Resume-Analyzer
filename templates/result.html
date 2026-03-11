@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Resume Analysis Results</h1>
+            <p class="subtitle">Here's what our AI found in your resume</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Resume Score Section -->
+            <section class="score-section">
+                <div class="score-card">
+                    <h2>Resume Score</h2>
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span class="score-number">{{ analysis_result.score }}</span>
+                            <span class="score-label">out of 100</span>
+                        </div>
+                    </div>
+                    <div class="score-message">
+                        {% if analysis_result.score >= 80 %}
+                            <p class="score-excellent">🎉 Excellent! Your resume is well-structured.</p>
+                        {% elif analysis_result.score >= 60 %}
+                            <p class="score-good">👍 Good! Your resume has room for improvement.</p>
+                        {% elif analysis_result.score >= 40 %}
+                            <p class="score-average">📈 Average. Consider our suggestions below.</p>
+                        {% else %}
+                            <p class="score-poor">💪 Your resume needs significant improvements.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Skills Section -->
+            <section class="skills-section">
+                <div class="skills-card">
+                    <h2>Detected Skills</h2>
+                    {% if analysis_result.skills %}
+                        <div class="skills-grid">
+                            {% for skill in analysis_result.skills %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        <p class="skills-count">Found {{ analysis_result.skills|length }} technical skills</p>
+                    {% else %}
+                        <p class="no-skills">No technical skills detected. Make sure to list your skills clearly in your resume.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Suggestions Section -->
+            <section class="suggestions-section">
+                <div class="suggestions-card">
+                    <h2>Improvement Suggestions</h2>
+                    {% if analysis_result.suggestions %}
+                        <ul class="suggestions-list">
+                            {% for suggestion in analysis_result.suggestions %}
+                                <li class="suggestion-item">
+                                    <span class="suggestion-icon">💡</span>
+                                    <span class="suggestion-text">{{ suggestion }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-suggestions">Great job! Your resume looks well-structured.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Job Matches Section -->
+            <section class="jobs-section">
+                <div class="jobs-card">
+                    <h2>Top Job Matches</h2>
+                    {% if matching_jobs %}
+                        {% for job in matching_jobs %}
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <h3 class="job-title">{{ job.title }}</h3>
+                                    <span class="job-company">{{ job.company }}</span>
+                                    <div class="match-score">
+                                        <span class="match-percentage">{{ job.match_score }}%</span>
+                                        <span class="match-label">Match</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="job-description">{{ job.description }}</p>
+                                
+                                <div class="job-details">
+                                    <div class="job-salary">
+                                        <span class="detail-label">Salary:</span>
+                                        <span class="detail-value">{{ job.salary_range }}</span>
+                                    </div>
+                                    
+                                    <div class="job-skills">
+                                        <span class="detail-label">Required Skills:</span>
+                                        <div class="required-skills">
+                                            {% for skill in job.skills %}
+                                                <span class="skill-badge {% if skill in job.matching_skills %}matched{% else %}missing{% endif %}">
+                                                    {{ skill }}
+                                                    {% if skill in job.matching_skills %}✓{% else %}✗{% endif %}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-jobs">No matching jobs found. Try adding more technical skills to your resume.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="actions-section">
+                <div class="action-buttons">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <span class="btn-icon">🔄</span>
+                        Analyze Another Resume
+                    </a>
+                    <button onclick="downloadResults()" class="btn btn-secondary">
+                        <span class="btn-icon">📥</span>
+                        Download Results
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Store data in hidden div for JavaScript access -->
+    <div id="analysisData" style="display: none;" 
+         data-score="{{ analysis_result.score }}" 
+         data-skills="{{ analysis_result.skills | tojson }}" 
+         data-suggestions="{{ analysis_result.suggestions | tojson }}" 
+         data-matching-jobs="{{ matching_jobs | tojson }}">
+    </div>
+
+    <script>
+        // Download results as JSON
+        function downloadResults() {
+            const dataElement = document.getElementById('analysisData');
+            const results = {
+                score: parseInt(dataElement.dataset.score),
+                skills: JSON.parse(dataElement.dataset.skills),
+                suggestions: JSON.parse(dataElement.dataset.suggestions),
+                matching_jobs: JSON.parse(dataElement.dataset.matchingJobs),
+                analysis_date: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'resume_analysis_results.json';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Add animation to score circle
+        document.addEventListener('DOMContentLoaded', function() {
+            const scoreCircle = document.querySelector('.score-circle');
+            if (scoreCircle) {
+                setTimeout(() => {
+                    scoreCircle.classList.add('animate');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

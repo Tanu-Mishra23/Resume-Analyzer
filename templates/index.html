@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>AI Resume Analyzer</h1>
+            <p class="subtitle">Upload your resume to get AI-powered insights and job matches</p>
+        </header>
+
+        <main class="main-content">
+            <div class="upload-section">
+                <div class="upload-card">
+                    <div class="upload-icon">
+                        📄
+                    </div>
+                    
+                    <h2>Upload Your Resume</h2>
+                    <p class="upload-description">
+                        Upload your PDF resume to analyze your skills and find matching jobs
+                    </p>
+                    
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="file-input-wrapper">
+                            <input type="file" 
+                                   id="resumeFile" 
+                                   name="resume" 
+                                   accept=".pdf" 
+                                   required>
+                            <label for="resumeFile" class="file-input-label">
+                                <span class="file-icon">📁</span>
+                                <span class="file-text">Choose PDF File</span>
+                            </label>
+                        </div>
+                        
+                        <div id="fileInfo" class="file-info" style="display: none;">
+                            <span class="file-name"></span>
+                            <button type="button" class="remove-file" onclick="removeFile()">✕</button>
+                        </div>
+                        
+                        <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+                            <span class="btn-text">Analyze Resume</span>
+                            <span class="btn-loader" style="display: none;">Processing...</span>
+                        </button>
+                    </form>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <span class="feature-icon">🔍</span>
+                            <span class="feature-text">Skill Extraction</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📊</span>
+                            <span class="feature-text">Resume Scoring</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">💼</span>
+                            <span class="feature-text">Job Matching</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">💡</span>
+                            <span class="feature-text">Improvement Tips</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>How It Works</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Upload Resume</h4>
+                            <p>Upload your PDF resume (max 16MB)</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>AI Analysis</h4>
+                            <p>Our AI extracts skills and analyzes your resume</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Get Results</h4>
+                            <p>Receive score, suggestions, and job matches</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <span class="error-icon">⚠️</span>
+            <span class="error-text"></span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
